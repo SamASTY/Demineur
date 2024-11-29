@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "Jeu.h"
 
 
@@ -10,6 +11,7 @@ int main(void) {
     p.Nb_Bombe = 11;
     initialisation(&p);
     while (1) {
+        affichage(&p);
         printf("Que veux tu faire : \n");
         char Commande[TailleMaxCommande]; // stockage de la commande
         if (fgets(Commande, TailleMaxCommande, stdin) != NULL) {
@@ -37,7 +39,6 @@ int main(void) {
             viderBuffer();
             continue;
         }
-
         char *detailscommande = strtok(Commande, " ");
         char TabCommande[NBMaxCommande][TailleMaxCommande];
         int nbcommandes = 0;
@@ -53,20 +54,23 @@ int main(void) {
         if (strcmp(TabCommande[0], "exit") == 0) {
             break;
         }
-        if (strcmp(TabCommande[0], "statut") == 0) {
-            statut(&p);
-        }
+
         if (strcmp(TabCommande[0], "affall") == 0) {
             affichage_all((p.Terrain));
         }
-        if (strcmp(TabCommande[0], "aff") == 0) {
-            affichage(&p);
-        }
-        if (strcmp(TabCommande[0], "jouer") == 0) {
+
+        if (strcmp(TabCommande[0], "coup") == 0) {
             coup(&p, atoi(TabCommande[1]), atoi(TabCommande[2]));
-        }
-        if (strcmp(TabCommande[0], "case") == 0) {
-            printf("%d\n", whats_that(&p, atoi(TabCommande[1]), atoi(TabCommande[2])));
+            if (statut(&p) == 2) {
+                affichage_all(&p);
+                printf("Partie Gagner\n");
+                break;
+            }
+            if (statut(&p) == 0) {
+                printf("Partie Perdu\n");
+                affichage_all(&p);
+                break;
+            }
         }
     }
 }

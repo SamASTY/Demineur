@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "Jeu.h"
 #include "Terrain.h"
+
 
 void viderBuffer() {
     int c;
@@ -16,7 +19,10 @@ void affichage_all(const Case terrain[TAILLE_TERRAIN][TAILLE_TERRAIN]) {
     for (int i = 0; i < TAILLE_TERRAIN; i++) {
         printf(" %3d ", i);
         for (int j = 0; j < TAILLE_TERRAIN; j++) {
-            if (terrain[i][j].type == Vide) {
+            if (terrain[i][j].type == Vide && terrain[i][j].etat == Vu) {
+                printf(" %d ",terrain[i][j].valeur);
+            }
+            if (terrain[i][j].type == Vide && terrain[i][j].etat == Masque) {
                 printf(" . ");
             }
             if (terrain[i][j].type == Bombe) {
@@ -49,7 +55,6 @@ void affichage(const Partie *p) {
         printf("\n");
     }
 }
-
 
 void permut(Case terrain[TAILLE_TERRAIN][TAILLE_TERRAIN], int index1, int index2) {
     int row1 = index1 / TAILLE_TERRAIN;
@@ -87,15 +92,12 @@ void initialisation(Partie *p) {
     mix(p);
 }
 
-
-
 int statut(const Partie *p) {
     int count = 0;
     for (int i = 0; i < TAILLE_TERRAIN; i++) {
         for (int j = 0; j < TAILLE_TERRAIN; j++) {
             if (p->Terrain[i][j].etat == Vu
                 && p->Terrain[i][j].type == Bombe) {
-                printf("Partie Perdu\n");
                 return 0;
             }
             if (p->Terrain[i][j].etat == Vu
@@ -104,11 +106,9 @@ int statut(const Partie *p) {
             }
         }
     }
-    if (count - p->Nb_Bombe == TAILLE_TERRAIN * TAILLE_TERRAIN) {
-        printf("Partie Gagner\n");
+    if (count + p->Nb_Bombe == TAILLE_TERRAIN * TAILLE_TERRAIN) {
         return 2;
     }
-    printf("Partie En Cour\n");
     return 1;
 }
 
@@ -138,15 +138,37 @@ int nb_bombre_voisine(Partie *p, const int i, const int j) {
     return nb_B;
 }
 
+void est_vide(Partie *p, const int i, const int j) {
+    if (nb_bombre_voisine(p, i, j) == 0 && p->Terrain[i][j].etat != Vu) {
+        p->Terrain[i][j].etat = Vu;
+        p->Terrain[i][j].type = Vide;
+        p->Terrain[i][j].valeur = nb_bombre_voisine(p, i, j);
+        for (int k = i - 1; k <= i + 1; k++) {
+            for (int m = j - 1; m <= j + 1; m++) {
+                if (whats_that(&p, k, m) > 0) {
+                    est_vide(p, k, m);
+                }
+            }
+        }
+    }
+}
+
 void coup(Partie *p, const int i, const int j) {
     if (!whats_that(p, i, j))
         printf("Il n'est pas possible de jouer en dehors des limites du terrains\n");
     else {
         if (whats_that(p, i, j) == 2) {
             int val = nb_bombre_voisine(p, i, j);
+            if (val == 0) {
+                est_vide(p, i, j);
+            } else {
+                p->Terrain[i][j].etat = Vu;
+                p->Terrain[i][j].valeur = val;
+            }
+        }
+        if (whats_that(p, i, j) == 1) {
             p->Terrain[i][j].etat = Vu;
-            p->Terrain[i][j].type = Vide;
-            p->Terrain[i][j].valeur = val;
+            p->Terrain[i][j].type;
         }
     }
 }

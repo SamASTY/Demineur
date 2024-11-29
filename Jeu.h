@@ -78,3 +78,12 @@ int nb_bombre_voisine(Partie *p, const int i, const int j);
 */
 void coup(Partie *p, const int i, const int j);
 
+/**
+* @brief La fonction permet trouver toutes les cases environnante n'ayant pas de bombe a coté pour les decouvrir
+* @param[int] p terrain de la partie de demineur et nombre de bombe
+* @param[in] i case du terrain a l'indice i
+* @param[in] j case du terran a l'indice j
+* @sa whats_that()
+* @sa nb_bombre_voisine()
+*/
+void est_vide(Partie *p, const int i, const int j);
